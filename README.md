@@ -5,7 +5,7 @@ This PowerShell script automates the uninstallation and reinstallation of the Du
 
 ## Disclaimer
 🤖 **AI-Assisted Development**
-This script was created with significant assistance from AI technologies. As the developer is not a professional PowerShell or software development expert, the code reflects a collaborative approach between human intent and AI-generated solutions.
+This script was created with significant assistance from AI technologies. As the creator is not a professional PowerShell or software developer, the code reflects a collaborative approach between human intent and AI-generated solution.
 
 ## Features
 - Remotely uninstall existing Duo Authentication
@@ -41,7 +41,9 @@ Installation logs are saved to `C:\Tools\DuoInstall.log`
 - Requires administrative permissions
 
 ## License
-[Specify your license here]
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/.
 
 ## Contributing
 Contributions, improvements, and bug reports are welcome!
