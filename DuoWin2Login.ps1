@@ -251,7 +251,7 @@ Extract-DuoMsiRemote -hostname $hostname -zipPath "C:\Tools\Script\DUO.ZIP" -ext
 
 # Define necessary parameters for installation
 $msiPath = "C:\tools\Script\DuoWindowsLogon64.msi"
-$dhost = "api-b99db8f3.duosecurity.com"
+$dhost = "api.duosecurity.com"
 $autopush = "#1"
 $failopen = "#0"
 $smartcard = "#0"
