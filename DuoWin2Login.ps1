@@ -256,7 +256,7 @@ $autopush = "#1"
 $failopen = "#0"
 $smartcard = "#0"
 $rdponly = "#0"
-$logPath = "C:\Tools\Script\DuoInstall.log"
+$logPath = "C:\Tools\DuoInstall.log"
 $folderPath = "C:\Tools\Script"
 
 # Prepare the msiexec command with detailed logging
