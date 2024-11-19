@@ -33,7 +33,7 @@ Modify the following variables in the script as needed:
 - `$dhost`: Duo API hostname
 
 ## Logging
-Installation logs are saved to `C:\Tools\Script\DuoInstall.log`
+Installation logs are saved to `C:\Tools\DuoInstall.log`
 
 ## Caution
 - Ensure you have proper authorization before running on any system
