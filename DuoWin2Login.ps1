@@ -136,7 +136,7 @@ Invoke-Command -ComputerName $hostname -ScriptBlock {
 } -ArgumentList $folderPath
 
 # Function to download Duo Authentication for Windows Logon using curl on the remote host
-function Download-FileRemote {
+function Get-FileRemote {
     param (
         [string]$hostname,
         [string]$url,
@@ -163,7 +163,7 @@ function Download-FileRemote {
 }
 
 # Function to extract DuoWindowsLogon64.msi from DUO.ZIP and copy to C:\tools on the remote host
-function Extract-DuoMsiRemote {
+function Expand-DuoMsiRemote {
     param (
         [string]$hostname,
         [string]$zipPath,
@@ -245,9 +245,8 @@ function Uninstall-DuoRemote {
 }
 
 # Call the functions
-Uninstall-DuoRemote -hostname $hostname
-Download-FileRemote -hostname $hostname -url "https://dl.duosecurity.com/DuoWinLogon_MSIs_Policies_and_Documentation-$($duoVersion).zip" -path "C:\Tools\Script"
-Extract-DuoMsiRemote -hostname $hostname -zipPath "C:\Tools\Script\DUO.ZIP" -extractPath "C:\Tools\Script"
+Uninstall-DuoRemote -hostname $hoGet -hostname $hostname -url "https://dl.duosecurity.com/DuoWinLogon_MSIs_Policies_and_Documentation-$($duoVersion).zip" -path "C:\Tools\Script"
+Expand-DuoMsiRemote -hostname $hostname -zipPath "C:\Tools\Script\DUO.ZIP" -extractPath "C:\Tools\Script"
 
 # Define necessary parameters for installation
 $msiPath = "C:\tools\Script\DuoWindowsLogon64.msi"
