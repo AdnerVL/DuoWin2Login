@@ -29,7 +29,6 @@ if (Test-Path $envFile) {
 $duoVersion = "4.3.1"
 $ikey = $env:IKEY
 $skey = $env:SKEY
-$dhost = $env:DHOST
 
 # Ensure C:\Tools\Script folder exists
 $folderPath = "C:\Tools\Script"
@@ -255,11 +254,13 @@ function Uninstall-DuoRemote {
 }
 
 # Call the functions
-Uninstall-DuoRemote -hostname $hoGet -hostname $hostname -url "https://dl.duosecurity.com/DuoWinLogon_MSIs_Policies_and_Documentation-$($duoVersion).zip" -path "C:\Tools\Script"
+Uninstall-DuoRemote -hostname $hostname
+Get-FileRemote -hostname $hostname -url "https://dl.duosecurity.com/DuoWinLogon_MSIs_Policies_and_Documentation-$($duoVersion).zip" -path "C:\Tools\Script"
 Expand-DuoMsiRemote -hostname $hostname -zipPath "C:\Tools\Script\DUO.ZIP" -extractPath "C:\Tools\Script"
 
 # Define necessary parameters for installation
 $msiPath = "C:\tools\Script\DuoWindowsLogon64.msi"
+$dhost = $env:DHOST
 $autopush = "#1"
 $failopen = "#0"
 $smartcard = "#0"
