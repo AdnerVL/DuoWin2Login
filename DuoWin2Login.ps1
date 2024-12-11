@@ -17,9 +17,19 @@ if ([string]::IsNullOrWhiteSpace($hostname)) {
     exit
 }
 
+# Load .env file
+$envFile = Join-Path $PSScriptRoot ".env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        $key, $value = $_.Split('=')
+        [Environment]::SetEnvironmentVariable($key, $value, 'Process')
+    }
+}
+
 $duoVersion = "4.3.1"
-$ikey = "SecretKey"
-$skey = "secretKey" 
+$ikey = $env:IKEY
+$skey = $env:SKEY
+$dhost = $env:DHOST
 
 # Ensure C:\Tools\Script folder exists
 $folderPath = "C:\Tools\Script"
@@ -236,7 +246,7 @@ function Uninstall-DuoRemote {
             $result = wmic product where 'name="Duo Authentication for Windows Logon x64"' call uninstall /nointeractive
         } -ErrorAction SilentlyContinue
         Write-Output $result
-        Write-Output "Existing Duo install removed."
+            Write-Output "Existing Duo install removed."
     }
     catch {
         Write-Output "Failed to uninstall Duo on $hostname."
@@ -250,7 +260,6 @@ Expand-DuoMsiRemote -hostname $hostname -zipPath "C:\Tools\Script\DUO.ZIP" -extr
 
 # Define necessary parameters for installation
 $msiPath = "C:\tools\Script\DuoWindowsLogon64.msi"
-$dhost = "api.duosecurity.com"
 $autopush = "#1"
 $failopen = "#0"
 $smartcard = "#0"
