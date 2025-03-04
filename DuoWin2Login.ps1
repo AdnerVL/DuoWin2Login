@@ -3,27 +3,44 @@ param(
     [string]$hostname
 )
 
+function Write-ProgressBar {
+    param(
+        [string]$Task,
+        [int]$Percentage
+    )
+    $barLength = 30
+    $filledLength = [math]::Floor($Percentage / 100 * $barLength)
+    $bar = "[" + ("=" * $filledLength) + ("." * ($barLength - $filledLength)) + "]"
+    
+    Write-Host ("{0,-40} {1,4}% {2}" -f $Task, $Percentage, $bar) -ForegroundColor Magenta
+}
+
 # Logging function with Cyberpunk ASCII loading effect
 function Write-LogMessage {
     param(
         [string]$Message,
         [switch]$IsError,
-        [switch]$Loading
+        [switch]$Loading,
+        [int]$ProgressPercentage = -1
     )
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logMessage = "[$timestamp] $Message"
     
     if ($Loading) {
-        $asciiFrames = @("|", "/", "-", "\")
+        $asciiFrames = @(" * ", " * ", " * ", " * ", " * ", " * ")
         Write-Host -NoNewline "[NEON_BOOT] $Message " -ForegroundColor Cyan
         for ($i = 0; $i -lt 5; $i++) {
             $frame = $asciiFrames[$i % $asciiFrames.Length]
-            Write-Host -NoNewline "[$frame]" -ForegroundColor Magenta
+            Write-Host -NoNewline "$frame" -ForegroundColor Magenta
             Start-Sleep -Milliseconds 200
         }
         Write-Host "" # Newline after loading
     }
     
+    if ($ProgressPercentage -ne -1) {
+        Write-ProgressBar -Task $Message -Percentage $ProgressPercentage
+    }
+
     if ($IsError) {
         Write-Host "[X] $logMessage" -ForegroundColor Red
         Add-Content -Path "$env:TEMP\DuoInstallLog.txt" -Value "ERROR: $logMessage"
@@ -190,7 +207,7 @@ $msiName = "DuoWindowsLogon64.msi"
 $msiPath = "$remoteFolderPath\$msiName"
 
 # Create remote folder
-Write-LogMessage -Message "Initializing remote filesystem..." -Loading
+Write-LogMessage -Message "Initializing remote filesystem..." -Loading -ProgressPercentage 10
 $cmd = "cmd /c if not exist `"$remoteFolderPath`" mkdir `"$remoteFolderPath`""
 $result = & $psExecPath "\\$hostname" -s cmd.exe /c $cmd 2>&1 | Out-String
 if ($LASTEXITCODE -ne 0) {
