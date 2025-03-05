@@ -1,36 +1,58 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 
-REM Check if running as admin; if not, relaunch with elevation
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Requesting administrative privileges...
-    powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/c %~dpnx0' -Verb RunAs"
-    exit /b
-)
+powershell -Command "Set-ItemProperty -Path 'HKCU:\Console' -Name 'VirtualTerminalLevel' -Value 1" >nul 2>&1
 
-REM Define the PowerShell script path based on the .bat file location
-set "PS_SCRIPT=%~dp0DuoWin2Login.ps1"
+set "NEON_CYAN=="
+set "NEON_MAGENTA=="
+set "NEON_GREEN=="
+set "NEON_RED=="
+set "NEON_YELLOW=="
+set "MATRIX_RESET=="
 
-REM Check if the PowerShell script exists
-if not exist "%PS_SCRIPT%" (
-    echo Error: PowerShell script not found at %PS_SCRIPT%
-    echo Please ensure DuoWin2Login.ps1 is in the same directory as this .bat file.
+echo %NEON_MAGENTA%+===============================+%MATRIX_RESET%
+echo %NEON_CYAN%    DUO WINDOWS LOGON INSTALL    %MATRIX_RESET%
+echo %NEON_MAGENTA%+===============================+%MATRIX_RESET%
+
+REM Check if hostname is provided
+if "%~1"=="" (
+    echo %NEON_RED%Error: Hostname required%MATRIX_RESET%
+    echo Usage: %0 hostname
+    echo Please provide a hostname to proceed.
     pause
     exit /b 1
 )
 
-REM Temporarily set PowerShell execution policy to Bypass
-echo Setting PowerShell execution policy to Bypass...
-powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force"
+REM Probe network privileges
+echo %NEON_YELLOW%Scanning access vectors...%MATRIX_RESET%
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo %NEON_RED%Elevating system access%MATRIX_RESET%
+    powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/c %~dpnx0 %~1' -Verb RunAs"
+    exit /b
+)
 
-REM Run the PowerShell script from the .bat file's location
-echo Launching PowerShell script with admin privileges...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%PS_SCRIPT%"
+REM Locate payload
+echo %NEON_YELLOW%Locating quantum module...%MATRIX_RESET%
+set "CYBERWARE_PAYLOAD=%~dp0DuoWin2Login.ps1"
+if not exist "%CYBERWARE_PAYLOAD%" (
+    echo %NEON_RED%Module not found%MATRIX_RESET%
+    pause
+    exit /b 1
+)
 
-REM Optional: Revert execution policy to default
-echo Reverting PowerShell execution policy...
-powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Restricted -Force"
+REM Bypass execution policy
+echo %NEON_CYAN%Hacking neural protocols...%MATRIX_RESET%
+powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force" >nul 2>&1
 
-echo Script execution completed.
-pause
+REM Deploy authentication
+echo %NEON_GREEN%Initializing quantum auth...%MATRIX_RESET%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%CYBERWARE_PAYLOAD%" -hostname "%~1"
+
+REM Reset system
+echo %NEON_YELLOW%Restoring system integrity...%MATRIX_RESET%
+powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Restricted -Force" >nul 2>&1
+
+echo %NEON_MAGENTA%+=====================================+%MATRIX_RESET%
+echo %NEON_GREEN%    DUO LOGON INSTALLATION COMPLETE    %MATRIX_RESET%
+echo %NEON_MAGENTA%+=====================================+%MATRIX_RESET%
