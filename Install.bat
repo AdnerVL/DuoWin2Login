@@ -16,11 +16,10 @@ echo %NEON_MAGENTA%+===============================+%MATRIX_RESET%
 
 REM Check if hostname is provided
 if "%~1"=="" (
-    echo %NEON_RED%Error: Hostname required%MATRIX_RESET%
-    echo Usage: %0 hostname
-    echo Please provide a hostname to proceed.
-    pause
-    exit /b 1
+    echo %NEON_YELLOW%No hostname provided. You will be prompted.%MATRIX_RESET%
+    set "HOSTNAME="
+) else (
+    set "HOSTNAME=%~1"
 )
 
 REM Probe network privileges
@@ -28,7 +27,7 @@ echo %NEON_YELLOW%Scanning access vectors...%MATRIX_RESET%
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo %NEON_RED%Elevating system access%MATRIX_RESET%
-    powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/c %~dpnx0 %~1' -Verb RunAs"
+    powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/c %~dpnx0 %HOSTNAME%' -Verb RunAs"
     exit /b
 )
 
@@ -47,7 +46,12 @@ powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -Executio
 
 REM Deploy authentication
 echo %NEON_GREEN%Initializing quantum auth...%MATRIX_RESET%
-powershell -NoProfile -ExecutionPolicy Bypass -File "%CYBERWARE_PAYLOAD%" -hostname "%~1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%CYBERWARE_PAYLOAD%" -hostname "%HOSTNAME%"
+if %ERRORLEVEL% neq 0 (
+    echo %NEON_RED%Error: Installation failed. Check %TEMP%\DuoInstallLog.txt for details.%MATRIX_RESET%
+    pause
+    exit /b 1
+)
 
 REM Reset system
 echo %NEON_YELLOW%Restoring system integrity...%MATRIX_RESET%
@@ -56,3 +60,4 @@ powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -Executio
 echo %NEON_MAGENTA%+=====================================+%MATRIX_RESET%
 echo %NEON_GREEN%    DUO LOGON INSTALLATION COMPLETE    %MATRIX_RESET%
 echo %NEON_MAGENTA%+=====================================+%MATRIX_RESET%
+pause
