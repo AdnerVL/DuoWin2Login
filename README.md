@@ -1,7 +1,3 @@
-Below is an updated version of your `README.md` that reflects the current state of your script, including the `.bat` file wrapper, the fixes we’ve implemented, and additional details about features and usage. I’ve kept the structure intact, updated relevant sections, and ensured it aligns with your latest script functionality as of March 5, 2025.
-
----
-
 # 🔐 Duo Authentication Reinstallation Script
 
 ## 🚀 Overview
@@ -128,5 +124,3 @@ March 5, 2025
 7. **Logging:** Clarified log file locations and behavior.
 8. **Known Issues:** Noted the fixed `FileStream` error.
 9. **Last Updated:** Set to current date (March 5, 2025).
-
-This README now accurately reflects your project’s current state, including the `.bat` integration and fixes we’ve discussed. Save this as `README.md` in your project root. Let me know if you’d like further tweaks!
