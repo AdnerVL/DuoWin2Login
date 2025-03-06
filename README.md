@@ -111,16 +111,3 @@ Contributions, improvements, and bug reports are welcome! Please submit pull req
 
 ## 📅 Last Updated
 March 5, 2025
-
----
-
-### Key Updates from Your Original README- 🔴
-1. **Title:** Updated to "Duo Authentication Reinstallation Script" to match your script’s name (`DuoWin2Login`).
-2. **Overview:** Added mention of the `.bat` wrapper.
-3. **Features:** Expanded to include progress tracking, color-coded output, and `-QuietSuccess`.
-4. **Prerequisites:** Added `.bat` elevation requirement.
-5. **Usage:** Added `.bat` execution instructions and example output from your run.
-6. **Configuration:** Included configurable parameters from the script.
-7. **Logging:** Clarified log file locations and behavior.
-8. **Known Issues:** Noted the fixed `FileStream` error.
-9. **Last Updated:** Set to current date (March 5, 2025).
