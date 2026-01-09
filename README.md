@@ -19,13 +19,23 @@ This tool helps you install or reinstall Duo Authentication for Windows Logon on
    Replace the placeholders with your actual Duo credentials.
 
 ## How to Run
+
+### Recommended Quick Method (Admin PowerShell)
+Sometimes the only reliable way is to unblock the script and run it directly from an elevated PowerShell console.
+
+1. Unblock the script: `Unblock-File .\DuoWin2Login.ps1`
+2. Run PowerShell as Administrator.
+3. Navigate to the folder and run: `.\DuoWin2Login.ps1 -hostname <computer>`
+
+Replace `<computer>` with `localhost` for local install, or the remote computer's name/IP.
+
+### Alternative: Using Batch File
 Use the `Install.bat` file for easy setup. It will handle everything automatically.
 
-### Basic Usage
 - Double-click `Install.bat` and follow the prompts for the computer name.
 - Or run it from the command line: `Install.bat`
 
-### Examples
+#### Examples
 - **Local Install**: `Install.bat localhost` (installs on your own computer)
 - **Remote by Hostname**: `Install.bat MyComputer` (replace with the remote computer's name)
 - **Remote by IP Address**: `Install.bat 192.168.1.100` (use the IP of the remote computer)
@@ -47,6 +57,7 @@ The script will ask if you want the latest version or an older one (4.3.1). If y
 - The script requires internet access to download Duo files.
 
 ## Troubleshooting
+- If you get "Access is denied", unblock the files: right-click each file > Properties > Unblock, or use `Unblock-File .\filename` in PowerShell. If permissions issues persist, take ownership: `takeown /f "path\to\file"` and grant access: `icacls "path\to\file" /grant "yourusername":F`.
 - If it fails, check the log file for details.
 - Make sure PowerShell scripts are allowed (run as admin if needed).
 - For remote installs, ensure the target computer is reachable and you have permissions.
