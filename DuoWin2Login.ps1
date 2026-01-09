@@ -124,15 +124,31 @@ if ([string]::IsNullOrWhiteSpace($hostname)) {
 # Step 3: Prompt for Duo version selection
 $script:currentStep++
 Write-Host "Select Duo version to install:" -ForegroundColor Cyan
-Write-Host "1) Latest version" -ForegroundColor Green
-Write-Host "2) Version 4.3.1 (default)" -ForegroundColor Green
-$versionChoice = Read-Host "Enter 1 or 2 (press Enter for default)"
-if ([string]::IsNullOrWhiteSpace($versionChoice) -or $versionChoice -eq "2") {
+Write-Host "1) Latest version (default)" -ForegroundColor Green
+Write-Host "2) Version 4.3.1" -ForegroundColor Green
+Write-Host "Press 1, 2, or wait 3 seconds for default..." -ForegroundColor Yellow
+$timeoutSeconds = 3
+$startTime = Get-Date
+$choice = $null
+while (((Get-Date) - $startTime).TotalSeconds -lt $timeoutSeconds) {
+    if ([Console]::KeyAvailable) {
+        $key = [Console]::ReadKey($true).Key
+        if ($key -eq 'D1' -or $key -eq 'NumPad1') { $choice = '1'; break }
+        if ($key -eq 'D2' -or $key -eq 'NumPad2') { $choice = '2'; break }
+        if ($key -eq 'Enter') { $choice = 'default'; break }
+    }
+    Start-Sleep -Milliseconds 100
+}
+if ($choice -eq $null) {
+    Write-Host "Timeout reached. Using default (latest version)." -ForegroundColor Yellow
+    $choice = 'default'
+}
+if ($choice -eq '2') {
     $duoVersion = "4.3.1"
-    Write-LogMessage -Message "User selected Duo version: 4.3.1 (default)" -QuietSuccess
+    Write-LogMessage -Message "User selected Duo version: 4.3.1" -QuietSuccess
 } else {
     $duoVersion = $null
-    Write-LogMessage -Message "User selected latest Duo version" -QuietSuccess
+    Write-LogMessage -Message "User selected Duo version: latest (default)" -QuietSuccess
 }
 
 # Step 4: Wait for PsExec job
@@ -243,7 +259,7 @@ $cmd = "cmd /c if not exist `"$remoteFolderPath`" mkdir `"$remoteFolderPath`""
 if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $result = Invoke-Expression $cmd 2>&1 | Out-String
 } else {
-    $rawResult = & $psExecPath "\\$hostname" -s cmd.exe /c $cmd 2>&1 | Out-String
+    $rawResult = & $psExecPath "\\$hostname" -s -accepteula cmd.exe /c $cmd 2>&1 | Out-String
     if ($LASTEXITCODE -eq 0) {
         $result = $rawResult -replace "(?s).*cmd.exe exited on.*with error code 0.*$", ""
         $result = $result.Trim()
@@ -262,7 +278,7 @@ Write-LogMessage -Message "Purging old Duo cyberware..." -Loading -ProgressPerce
 $uninstallCmd = @"
 `$ErrorActionPreference = 'Stop'
 try {
-    `$duoProducts = Get-WmiObject -Class Win32_Product | Where-Object { `$_.Name -eq 'Duo Authentication for Windows Logon x64' -or `$_.Name -like '*Duo Authentication*' }
+    `$duoProducts = Get-CimInstance -ClassName Win32_Product | Where-Object { `$_.Name -eq 'Duo Authentication for Windows Logon x64' -or `$_.Name -like '*Duo Authentication*' }
     if (`$duoProducts) {
         foreach (`$product in `$duoProducts) {
             `$uninstallResult = `$product.Uninstall()
@@ -280,7 +296,7 @@ try {
 if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $result = Invoke-Expression $uninstallCmd 2>&1 | Out-String
 } else {
-    $rawResult = & $psExecPath "\\$hostname" -s -h powershell.exe -Command $uninstallCmd 2>&1 | Out-String
+    $rawResult = & $psExecPath "\\$hostname" -s -accepteula powershell.exe -Command $uninstallCmd 2>&1 | Out-String
     if ($LASTEXITCODE -eq 0) {
         $result = $rawResult -replace "(?s).*powershell.exe exited on.*with error code 0.*$", ""
         $result = $result.Trim()
@@ -299,7 +315,7 @@ if ($result -match "Error during uninstall" -or $LASTEXITCODE -ne 0) {
 $script:currentStep++
 Write-LogMessage -Message "Verifying no residual Duo signatures..." -Loading -ProgressPercentage (Get-ProgressivePercentage -TotalSteps $totalSteps -CurrentStep $currentStep)
 function Test-DuoInstallation {
-    $duoProducts = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -eq 'Duo Authentication for Windows Logon x64' -or $_.Name -like '*Duo Authentication*' }
+    $duoProducts = Get-CimInstance -ClassName Win32_Product | Where-Object { $_.Name -eq 'Duo Authentication for Windows Logon x64' -or $_.Name -like '*Duo Authentication*' }
     if ($duoProducts) { return ($duoProducts | ForEach-Object { $_.Name }) -join ', ' }
     return ''
 }
@@ -335,11 +351,11 @@ if ($verifyResult.Trim() -and $verifyResult -ne "Command completed successfully.
 $script:currentStep++
 Write-LogMessage -Message "Downloading Duo neural uplink..." -Loading -ProgressPercentage (Get-ProgressivePercentage -TotalSteps $totalSteps -CurrentStep $currentStep)
 $downloadUrl = "https://dl.duosecurity.com/DuoWinLogon_MSIs_Policies_and_Documentation-$($duoVersion).zip"
-$cmd = 'curl -o "' + $remoteFolderPath + '\DUO.ZIP" "' + $downloadUrl + '"'
+$cmd = "powershell.exe -Command \"Invoke-WebRequest -Uri '$downloadUrl' -OutFile '$remoteFolderPath\\DUO.ZIP'\""
 if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $result = Invoke-Expression $cmd 2>&1 | Out-String
 } else {
-    $rawResult = & $psExecPath "\\$hostname" -s cmd.exe /c $cmd 2>&1 | Out-String
+    $rawResult = & $psExecPath "\\$hostname" -s -accepteula cmd.exe /c $cmd 2>&1 | Out-String
     if ($LASTEXITCODE -eq 0) {
         $result = $rawResult -replace "(?s).*cmd.exe exited on.*with error code 0.*$", ""
         $result = $result.Trim()
@@ -386,7 +402,7 @@ if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $retryCount = 0
     $maxRetries = 3
     do {
-        $rawResult = & $psExecPath "\\$hostname" -s powershell.exe -Command $verifyCmd 2>&1 | Out-String
+        $rawResult = & $psExecPath "\\$hostname" -s -accepteula powershell.exe -Command $verifyCmd 2>&1 | Out-String
         Write-LogMessage -Message "Raw ZIP verification output: $rawResult" -QuietSuccess
         if ($LASTEXITCODE -eq 0) {
             $result = $rawResult -replace "(?s)^.*Starting powershell\.exe on $hostname[^\n]*\n", ""
@@ -516,7 +532,7 @@ if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $retryCount = 0
     $maxRetries = 3
     do {
-        $rawResult = & $psExecPath "\\$hostname" -s powershell.exe -Command $verifyCmd 2>&1 | Out-String
+        $rawResult = & $psExecPath "\\$hostname" -s -accepteula powershell.exe -Command $verifyCmd 2>&1 | Out-String
         Write-LogMessage -Message "Raw PsExec output: $rawResult" -QuietSuccess
         if ($LASTEXITCODE -eq 0) {
             $result = $rawResult -replace "(?s).*Starting powershell\.exe on $hostname.*?\n", ""
@@ -600,7 +616,7 @@ if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $retryCount = 0
     $maxRetries = 3
     do {
-        $rawResult = & $psExecPath "\\$hostname" -s powershell.exe -Command $verifyCommand 2>&1 | Out-String
+        $rawResult = & $psExecPath "\\$hostname" -s -accepteula powershell.exe -Command $verifyCommand 2>&1 | Out-String
         Write-LogMessage -Message "Raw remote verification output: $rawResult" -QuietSuccess
         if ($LASTEXITCODE -eq 0) {
             $result = $rawResult -replace "(?s)^.*Starting powershell\.exe on $hostname[^\n]*\n", ""
@@ -647,7 +663,7 @@ if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     }
 } else {
     $cmd = "cmd /c del `"$remoteFolderPath\DUO.ZIP`" `"$remoteFolderPath\$msiName`" `"$logPath`" /f /q 2>nul & rmdir /s /q `"$remoteFolderPath`""
-    $rawResult = & $psExecPath "\\$hostname" -s -n 30 cmd.exe /c $cmd 2>&1 | Out-String
+    $rawResult = & $psExecPath "\\$hostname" -s -accepteula -n 30 cmd.exe /c $cmd 2>&1 | Out-String
     if ($LASTEXITCODE -eq 0) {
         $result = $rawResult -replace "(?s).*cmd.exe exited on.*with error code 0.*$", ""
         $result = $result.Trim()
