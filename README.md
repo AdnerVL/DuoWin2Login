@@ -23,7 +23,7 @@ This tool helps you install or reinstall Duo Authentication for Windows Logon on
 ### Recommended Quick Method (Admin PowerShell)
 Sometimes the only reliable way is to unblock the script and run it directly from an elevated PowerShell console.
 
-1. Unblock the script: `Unblock-File .\DuoWin2Login.ps1`
+1. Unblock the script: right-click `DuoWin2Login.ps1` > Properties > check "Unblock" > OK. (Alternatively, in PowerShell: `Unblock-File .\DuoWin2Login.ps1`)
 2. Run PowerShell as Administrator.
 3. Navigate to the folder and run: `.\DuoWin2Login.ps1 -hostname <computer>`
 
@@ -57,7 +57,7 @@ The script will ask if you want the latest version or an older one (4.3.1). If y
 - The script requires internet access to download Duo files.
 
 ## Troubleshooting
-- If you get "Access is denied", unblock the files: right-click each file > Properties > Unblock, or use `Unblock-File .\filename` in PowerShell. If permissions issues persist, take ownership: `takeown /f "path\to\file"` and grant access: `icacls "path\to\file" /grant "yourusername":F`.
+- If you get "Access is denied", unblock the files: right-click each file > Properties > check "Unblock" > OK. If that doesn't work, use `Unblock-File .\filename` in PowerShell. If permissions issues persist, take ownership: `takeown /f "path\to\file"` and grant access: `icacls "path\to\file" /grant "yourusername":F`.
 - If it fails, check the log file for details.
 - Make sure PowerShell scripts are allowed (run as admin if needed).
 - For remote installs, ensure the target computer is reachable and you have permissions.
