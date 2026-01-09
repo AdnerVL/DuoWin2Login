@@ -282,8 +282,8 @@ try {
     if (`$duoProducts) {
         foreach (`$product in `$duoProducts) {
             `$productCode = `$product.IdentifyingNumber
-            `$uninstallResult = Start-Process -FilePath "msiexec.exe" -ArgumentList "/x `"`$productCode`"` /quiet /norestart" -Wait -PassThru
-            Write-Output "Uninstalling `$(`$product.Name): Exit Code `$(`$uninstallResult.ExitCode)"
+            `$null = & msiexec.exe /x "`$productCode" /quiet /norestart
+            Write-Output "Uninstalling `$(`$product.Name): Exit Code `$LASTEXITCODE"
         }
     } else {
         Write-Output 'No Duo installation found to uninstall.'
