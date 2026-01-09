@@ -351,7 +351,7 @@ if ($verifyResult.Trim() -and $verifyResult -ne "Command completed successfully.
 $script:currentStep++
 Write-LogMessage -Message "Downloading Duo neural uplink..." -Loading -ProgressPercentage (Get-ProgressivePercentage -TotalSteps $totalSteps -CurrentStep $currentStep)
 $downloadUrl = "https://dl.duosecurity.com/DuoWinLogon_MSIs_Policies_and_Documentation-$($duoVersion).zip"
-$cmd = "powershell.exe -Command \"Invoke-WebRequest -Uri '$downloadUrl' -OutFile '$remoteFolderPath\\DUO.ZIP'\""
+$cmd = "powershell.exe -Command `"Invoke-WebRequest -Uri '$downloadUrl' -OutFile '$remoteFolderPath\DUO.ZIP'`""
 if ($hostname -eq "localhost" -or $hostname -eq $env:COMPUTERNAME) {
     $result = Invoke-Expression $cmd 2>&1 | Out-String
 } else {
