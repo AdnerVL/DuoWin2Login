@@ -278,12 +278,11 @@ Write-LogMessage -Message "Purging old Duo cyberware..." -Loading -ProgressPerce
 $uninstallCmd = @"
 `$ErrorActionPreference = 'Stop'
 try {
-`$duoProducts = Get-CimInstance -ClassName Win32_Product | Where-Object { `$_.Name -eq 'Duo Authentication for Windows Logon x64' -or `$_.Name -like '*Duo Authentication*' }
+`$duoProducts = Get-WmiObject -Class Win32_Product | Where-Object { `$_.Name -eq 'Duo Authentication for Windows Logon x64' -or `$_.Name -like '*Duo Authentication*' }
     if (`$duoProducts) {
         foreach (`$product in `$duoProducts) {
-            `$productCode = `$product.IdentifyingNumber
-            `$null = & msiexec.exe /x "`$productCode" /quiet /norestart
-            Write-Output "Uninstalling `$(`$product.Name): Exit Code `$LASTEXITCODE"
+            `$uninstallResult = `$product.Uninstall()
+            Write-Output "Uninstalling `$(`$product.Name): Exit Code `$(`$uninstallResult.ReturnValue)"
         }
     } else {
         Write-Output 'No Duo installation found to uninstall.'
