@@ -282,7 +282,7 @@ try {
     if (`$duoProducts) {
         foreach (`$product in `$duoProducts) {
             `$productCode = `$product.IdentifyingNumber
-            `$uninstallResult = Start-Process -FilePath "msiexec.exe" -ArgumentList "/x `$productCode /quiet /norestart" -Wait -PassThru
+            `$uninstallResult = Start-Process -FilePath "msiexec.exe" -ArgumentList ("/x", "`$productCode", "/quiet", "/norestart") -Wait -PassThru
             Write-Output "Uninstalling `$(`$product.Name): Exit Code `$(`$uninstallResult.ExitCode)"
         }
     } else {
